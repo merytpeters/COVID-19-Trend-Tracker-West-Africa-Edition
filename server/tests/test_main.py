@@ -1,4 +1,5 @@
 """Test for app entry point"""
+
 from fastapi.testclient import TestClient
 from server.apps.main import app
 

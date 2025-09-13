@@ -1,4 +1,5 @@
 """Main entry point for App"""
+
 from fastapi import FastAPI
 
 
