@@ -33,7 +33,7 @@ jobs:
           pip install black
           black --check server/
 
-#      - name: Run tests
-#        run: |
-#          pip install pytest
-#          pytest
+      - name: Run tests
+        run: |
+          pip install pytest
+          pytest
