@@ -80,9 +80,36 @@ def test_json_format(tmp_path):
     # Prepare a sample covid_data_clean.csv
     os.chdir(tmp_path)
     sample_rows = [
-        {"zone": "Nigeria", "subzone": "Lagos", "category": "Confirmed", "date": "2022-01-01", "count": "100", "location": "9.082, 8.6753", "lat": "9.082", "lon": "8.6753"},
-        {"zone": "Nigeria", "subzone": "Abuja", "category": "Confirmed", "date": "2022-01-02", "count": "50", "location": "9.0765, 7.3986", "lat": "9.0765", "lon": "7.3986"},
-        {"zone": "Ghana", "subzone": "Accra", "category": "Confirmed", "date": "2022-01-01", "count": "30", "location": "5.6037, -0.1870", "lat": "5.6037", "lon": "-0.1870"},
+        {
+            "zone": "Nigeria",
+            "subzone": "Lagos",
+            "category": "Confirmed",
+            "date": "2022-01-01",
+            "count": "100",
+            "location": "9.082, 8.6753",
+            "lat": "9.082",
+            "lon": "8.6753",
+        },
+        {
+            "zone": "Nigeria",
+            "subzone": "Abuja",
+            "category": "Confirmed",
+            "date": "2022-01-02",
+            "count": "50",
+            "location": "9.0765, 7.3986",
+            "lat": "9.0765",
+            "lon": "7.3986",
+        },
+        {
+            "zone": "Ghana",
+            "subzone": "Accra",
+            "category": "Confirmed",
+            "date": "2022-01-01",
+            "count": "30",
+            "location": "5.6037, -0.1870",
+            "lat": "5.6037",
+            "lon": "-0.1870",
+        },
     ]
     with open("covid_data_clean.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=sample_rows[0].keys(), delimiter="\t")
@@ -94,6 +121,7 @@ def test_json_format(tmp_path):
     # Check output file
     assert os.path.exists("covid_data_cache.json")
     import json
+
     with open("covid_data_cache.json", encoding="utf-8") as f:
         data = json.load(f)
         assert "Nigeria" in data
