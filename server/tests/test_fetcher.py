@@ -33,7 +33,8 @@ def test_filter_flatten_csv_data(tmp_path, sample_csv):
     # Check output file
     assert os.path.exists("covid_data_clean.csv")
     with open("covid_data_clean.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f, delimiter="\t")  # Match fetcher output delimiter
+        # Match fetcher output delimiter
+        reader = csv.DictReader(f, delimiter="\t")
         rows = list(reader)
         # Only Nigeria and Ghana should be present
         zones = [row["zone"] for row in rows]
@@ -111,8 +112,15 @@ def test_json_format(tmp_path):
             "lon": "-0.1870",
         },
     ]
-    with open("covid_data_clean.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=sample_rows[0].keys(), delimiter="\t")
+    with open(
+        "covid_data_clean.csv",
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as f:
+        writer = csv.DictWriter(
+            f, fieldnames=sample_rows[0].keys(), delimiter="\t"
+        )
         writer.writeheader()
         for row in sample_rows:
             writer.writerow(row)

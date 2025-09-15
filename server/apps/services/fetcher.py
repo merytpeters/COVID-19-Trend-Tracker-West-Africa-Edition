@@ -27,7 +27,11 @@ WEST_AFRICAN_COUNTRIES = [
 
 def get_covid_data():
     """Get Covid data from External API"""
-    url = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/covid-19-pandemic-worldwide-data/exports/csv?delimiter=%3B&list_separator=%2C&quote_all=false&with_bom=true"
+    url = (
+        "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/"
+        "covid-19-pandemic-worldwide-data/exports/csv"
+        "?delimiter=%3B&list_separator=%2C&quote_all=false&with_bom=true"
+    )
 
     with requests.get(url, stream=True) as response:
         if response.status_code == 200:
@@ -35,7 +39,9 @@ def get_covid_data():
                 file.write(response.content)
             print("Covid data downloaded and saved successfully.")
         else:
-            print(f"Failed to retrieve file: Status code {response.status_code}")
+            print(
+                f"Failed to retrieve file: Status code {response.status_code}"
+            )
 
 
 def filter_flatten_csv_data():
@@ -92,7 +98,10 @@ def json_format():
                 "subzone": row.get("subzone"),
                 "category": row["category"],
                 "date": row["date"],
-                "count": int(row["count"]) if row["count"].isdigit() else row["count"],
+                "count": (
+                    int(row["count"])
+                    if row["count"].isdigit() else row["count"]
+                ),
                 "location": row["location"],
                 "coordinates": {"lat": row["lat"], "lon": row["lon"]},
             }
