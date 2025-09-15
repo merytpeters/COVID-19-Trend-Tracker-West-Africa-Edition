@@ -53,7 +53,7 @@ def test_get_by_filter_not_found(monkeypatch):
 
 
 def test_get_by_time_found(monkeypatch):
-    from datetime import datetime, timedelta
+    from datetime import datetime
 
     today = datetime.now().strftime("%Y-%m-%d")
     mock_data = {

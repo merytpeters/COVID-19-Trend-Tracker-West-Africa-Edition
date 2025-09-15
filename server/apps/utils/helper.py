@@ -14,7 +14,10 @@ def cache_check():
 
 
 def flatten_values(data):
-    """Flatten all keys and all values (including digits) from nested dict/list into a list of lowercase strings."""
+    """Flatten all keys and all values
+    (including digits) from nested dict/list
+    into a list of lowercase strings.
+    """
     values = []
     if isinstance(data, dict):
         for k, v in data.items():
