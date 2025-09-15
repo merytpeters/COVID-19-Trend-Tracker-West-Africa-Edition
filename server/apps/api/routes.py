@@ -99,8 +99,7 @@ def compare_countries(countries: list[str] = Query(...), lastdays: int = Query(.
 
     if not result:
         return {
-            "error":
-            f"No records found for the given countries in the last {lastdays} days."
+            "error": f"No records found for {countries} in the last {lastdays} days."
         }
 
     return result
