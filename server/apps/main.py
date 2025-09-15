@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from mangum import Mangum
-from apps.api.routes import router as trend_router
+from server.apps.api.routes import router as trend_router
 
 
 app = FastAPI(title="COVID-19 Trend Tracker (West Africa Edition)")

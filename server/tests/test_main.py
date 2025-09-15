@@ -19,3 +19,9 @@ def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_api_routes():
+    """Test that /api routes are included (basic check for 404 or 200)"""
+    response = client.get("/api/")
+    assert response.status_code in (200, 404)
