@@ -1,5 +1,6 @@
 import json
 import pytest
+from datetime import datetime, timedelta
 from server.apps.utils import helper
 
 
@@ -23,8 +24,7 @@ def test_cache_check_not_found(tmp_path, monkeypatch):
     cache_path = tmp_path / "covid_data_cache.json"
     monkeypatch.setattr(helper, "cache_file", str(cache_path))
     result = helper.cache_check()
-    assert "error" in result
-    assert "Cache not found" in result["error"]
+    assert result is None
 
 
 def test_flatten_values_dict():
@@ -58,3 +58,26 @@ def test_record_matches_keywords_false():
     record = {"name": "Alice", "info": {"city": "Lagos", "age": 30}}
     keywords = ["alice", "paris"]
     assert not helper.record_matches_keywords(record, keywords)
+
+
+def test_filter_by_time_found():
+    today = datetime.now().strftime("%Y-%m-%d")
+    data = {
+        "Nigeria": [
+            {"date": today, "count": 1, "category": "Deaths", "subzone": "Lagos"}
+        ]
+    }
+    result = helper.filter_by_time(data, days=1)
+    assert "Nigeria" in result
+    assert result["Nigeria"][0]["date"] == today
+
+
+def test_filter_by_time_not_found():
+    old_date = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d")
+    data = {
+        "Nigeria": [
+            {"date": old_date, "count": 1, "category": "Deaths", "subzone": "Lagos"}
+        ]
+    }
+    result = helper.filter_by_time(data, days=1)
+    assert result == {}
