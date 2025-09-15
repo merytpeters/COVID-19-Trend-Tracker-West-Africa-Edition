@@ -1,3 +1,18 @@
+import os
+import json
+
+cache_file = "covid_data_cache.json"
+
+
+def cache_check():
+    if not os.path.exists(cache_file):
+        return {"error": "Cache not found. Please run /update-data first."}
+
+    with open(cache_file, "r", encoding="utf-8") as infile:
+        data = json.load(infile)
+    return data
+
+
 def flatten_values(data):
     """Flatten all keys and all values (including digits) from nested dict/list into a list of lowercase strings."""
     values = []

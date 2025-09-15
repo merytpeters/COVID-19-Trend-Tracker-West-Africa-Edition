@@ -1,7 +1,6 @@
 """Routes For Trend Tracker"""
 
-import json
-import os
+from datetime import datetime, timedelta
 from fastapi.routing import APIRouter
 from fastapi import Query
 from apps.services import fetcher
@@ -9,7 +8,6 @@ from apps.utils import helper
 
 
 router = APIRouter()
-cache_file = "covid_data_cache.json"
 
 
 @router.post("/update-data")
@@ -23,22 +21,13 @@ def update_data():
 
 @router.get("/get-all-data")
 def get_all_data():
-    """Return cached COVID-19 data as JSON"""
-    if os.path.exists(cache_file):
-        with open(cache_file, "r", encoding="utf-8") as infile:
-            data = json.load(infile)
-        return data
-    return {"error": "Cache not found. Please run /update-data first."}
+    data = helper.cache_check()
+    return data
 
 
 @router.get("/filter")
 def get_by_filter(keywords: list[str] = Query(...)):
-    """Get data by filter keywords with AND across country and record"""
-    if not os.path.exists(cache_file):
-        return {"error": "Cache not found. Please run /update-data first."}
-
-    with open(cache_file, "r", encoding="utf-8") as infile:
-        data = json.load(infile)
+    data = helper.cache_check()
 
     keywords_lower = [kw.lower() for kw in keywords]
     results = {}
@@ -63,5 +52,53 @@ def get_by_filter(keywords: list[str] = Query(...)):
 
     if not results:
         return {"error": f"No records found containing all keywords: {keywords}"}
+
+    return results
+
+
+@router.get("/timeseries")
+def get_by_time(
+    days: int = Query(
+        ..., description="Number of days to filter, e.g., 30 for last 30 days"
+    )
+):
+    """Filter by time duration"""
+    data = helper.cache_check()
+
+    if not data:
+        return {"error": "Cache not found. Please run /update-data first."}
+
+    cutoff_date = datetime.now() - timedelta(days=days)
+    results = {}
+
+    for country, records in data.items():
+        matching_records = []
+
+        if isinstance(records, list):
+            for record in records:
+                record_date_str = record.get("date")
+                if not record_date_str:
+                    continue
+                try:
+                    record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
+                    if record_date >= cutoff_date:
+                        matching_records.append(record)
+                except ValueError:
+                    continue
+        elif isinstance(records, dict):
+            record_date_str = records.get("date")
+            if record_date_str:
+                try:
+                    record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
+                    if record_date >= cutoff_date:
+                        matching_records.append(records)
+                except ValueError:
+                    pass
+
+        if matching_records:
+            results[country] = matching_records
+
+    if not results:
+        return {"error": f"No records found in the last {days} days."}
 
     return results
