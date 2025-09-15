@@ -1,6 +1,5 @@
 """Routes For Trend Tracker"""
 
-from datetime import datetime, timedelta
 from fastapi.routing import APIRouter
 from fastapi import Query
 from server.apps.services import fetcher
@@ -28,6 +27,9 @@ def get_all_data():
 @router.get("/filter")
 def get_by_filter(keywords: list[str] = Query(...)):
     data = helper.cache_check()
+
+    if not data:
+        return {"error": "Cache not found. Please run /update-data first."}
 
     keywords_lower = [kw.lower() for kw in keywords]
     results = {}
@@ -68,37 +70,36 @@ def get_by_time(
     if not data:
         return {"error": "Cache not found. Please run /update-data first."}
 
-    cutoff_date = datetime.now() - timedelta(days=days)
-    results = {}
-
-    for country, records in data.items():
-        matching_records = []
-
-        if isinstance(records, list):
-            for record in records:
-                record_date_str = record.get("date")
-                if not record_date_str:
-                    continue
-                try:
-                    record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
-                    if record_date >= cutoff_date:
-                        matching_records.append(record)
-                except ValueError:
-                    continue
-        elif isinstance(records, dict):
-            record_date_str = records.get("date")
-            if record_date_str:
-                try:
-                    record_date = datetime.strptime(record_date_str, "%Y-%m-%d")
-                    if record_date >= cutoff_date:
-                        matching_records.append(records)
-                except ValueError:
-                    pass
-
-        if matching_records:
-            results[country] = matching_records
-
+    results = helper.filter_by_time(data, days)
     if not results:
         return {"error": f"No records found in the last {days} days."}
 
     return results
+
+
+@router.get("/compare")
+def compare_countries(countries: list[str] = Query(...), lastdays: int = Query(...)):
+    """Compare countries data within a time period"""
+    data = helper.cache_check()
+    if not data:
+        return {"error": "Cache not found. Please run /update-data first."}
+
+    filtered_data = helper.filter_by_time(data, lastdays)
+    if not filtered_data:
+        return {"error": f"No records found in the last {lastdays} days."}
+
+    result = {}
+    filtered_countries_lower = {k.lower(): k for k in filtered_data.keys()}
+
+    for c in countries:
+        key_lower = c.lower()
+        if key_lower in filtered_countries_lower:
+            actual_key = filtered_countries_lower[key_lower]
+            result[actual_key] = filtered_data[actual_key]
+
+    if not result:
+        return {
+            "error": f"No records found for the given countries in the last {lastdays} days."
+        }
+
+    return result

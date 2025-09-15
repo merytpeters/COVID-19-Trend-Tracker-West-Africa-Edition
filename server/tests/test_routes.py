@@ -49,7 +49,9 @@ def test_get_by_filter_not_found(monkeypatch):
     )
     response = client.get("/api/filter", params={"keywords": "Nonexistent"})
     assert response.status_code == 200
-    assert "error" in response.json()
+    assert response.json()["error"].startswith(
+        "No records found containing all keywords"
+    )
 
 
 def test_get_by_time_found(monkeypatch):
@@ -62,6 +64,9 @@ def test_get_by_time_found(monkeypatch):
         ]
     }
     monkeypatch.setattr("server.apps.utils.helper.cache_check", lambda: mock_data)
+    monkeypatch.setattr(
+        "server.apps.utils.helper.filter_by_time", lambda data, days: mock_data
+    )
     response = client.get("/api/timeseries", params={"days": 1})
     assert response.status_code == 200
     assert "Nigeria" in response.json()
@@ -74,6 +79,50 @@ def test_get_by_time_not_found(monkeypatch):
         ]
     }
     monkeypatch.setattr("server.apps.utils.helper.cache_check", lambda: mock_data)
+    monkeypatch.setattr(
+        "server.apps.utils.helper.filter_by_time", lambda data, days: {}
+    )
     response = client.get("/api/timeseries", params={"days": 1})
     assert response.status_code == 200
-    assert "error" in response.json()
+    assert response.json()["error"].startswith("No records found in the last")
+
+
+def test_compare_countries_found(monkeypatch):
+    mock_data = {
+        "Nigeria": [
+            {"date": "2023-01-01", "count": 1, "category": "Deaths", "subzone": "Lagos"}
+        ],
+        "Ghana": [
+            {"date": "2023-01-01", "count": 2, "category": "Deaths", "subzone": "Accra"}
+        ],
+    }
+    monkeypatch.setattr("server.apps.utils.helper.cache_check", lambda: mock_data)
+    monkeypatch.setattr(
+        "server.apps.utils.helper.filter_by_time", lambda data, days: mock_data
+    )
+    response = client.get(
+        "/api/compare",
+        params=[("countries", "Nigeria"), ("countries", "Ghana"), ("lastdays", 1)],
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "Nigeria" in data
+    assert "Ghana" in data
+
+
+def test_compare_countries_not_found(monkeypatch):
+    mock_data = {
+        "Nigeria": [
+            {"date": "2023-01-01", "count": 1, "category": "Deaths", "subzone": "Lagos"}
+        ]
+    }
+    monkeypatch.setattr("server.apps.utils.helper.cache_check", lambda: mock_data)
+    monkeypatch.setattr(
+        "server.apps.utils.helper.filter_by_time", lambda data, days: {}
+    )
+    lastdays = 1
+    response = client.get(
+        "/api/compare", params=[("countries", "Nigeria"), ("lastdays", lastdays)]
+    )
+    assert response.status_code == 200
+    assert response.json()["error"] == f"No records found in the last {lastdays} days."
