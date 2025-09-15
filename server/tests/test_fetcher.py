@@ -112,15 +112,8 @@ def test_json_format(tmp_path):
             "lon": "-0.1870",
         },
     ]
-    with open(
-        "covid_data_clean.csv",
-        "w",
-        newline="",
-        encoding="utf-8"
-    ) as f:
-        writer = csv.DictWriter(
-            f, fieldnames=sample_rows[0].keys(), delimiter="\t"
-        )
+    with open("covid_data_clean.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=sample_rows[0].keys(), delimiter="\t")
         writer.writeheader()
         for row in sample_rows:
             writer.writerow(row)
