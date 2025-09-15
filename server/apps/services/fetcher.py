@@ -39,9 +39,7 @@ def get_covid_data():
                 file.write(response.content)
             print("Covid data downloaded and saved successfully.")
         else:
-            print(
-                f"Failed to retrieve file: Status code {response.status_code}"
-            )
+            print(f"Failed to retrieve file: Status code {response.status_code}")
 
 
 def filter_flatten_csv_data():
@@ -99,8 +97,7 @@ def json_format():
                 "category": row["category"],
                 "date": row["date"],
                 "count": (
-                    int(row["count"])
-                    if row["count"].isdigit() else row["count"]
+                    int(row["count"]) if row["count"].isdigit() else row["count"]
                 ),
                 "location": row["location"],
                 "coordinates": {"lat": row["lat"], "lon": row["lon"]},
