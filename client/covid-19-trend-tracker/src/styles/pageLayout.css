@@ -1,0 +1,9 @@
+.page-layout.dark-mode {
+    background-color: #222;
+    color: #eee;
+}
+
+.page-layout.light-mode {
+    color: #222;
+    background-color: #eee;
+}
